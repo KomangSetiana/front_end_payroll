@@ -1,97 +1,213 @@
 <template>
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h3>Daftar Cuti</h3>
-        </div>
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h3>Daftar Tipe Cuti</h3>
       </div>
     </div>
-  
-    <section class="content">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-6">
-            <div class="card">
-              <div class="card-header">
-                <router-link :to="{name: 'furloughtype.create'}" class="btn btn-primary text-white">
-                  <i class="fas fa-user-plus"></i> Tambah Cuti
-                </router-link>
-              </div>
-  
-              <div class="card-body">
-                <table id="example2" class="table table-bordered table-hover">
-                  <thead>
-                    <tr>
-                      <th>No</th>
-                      <th>Cuti</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="(furloughtype, index) in furloughtypes.data"
-                      :key="index"
-                    >
-                      <td>{{ furloughtype.id }}</td>
-                      <td>{{ furloughtype.furlough_name }}</td>
-                      <td>
-                        <div class="btn-group">
-                          <router-link :to="{name: 'furloughtype.update',params:{id: furloughtype.id}}" class="btn btn-sm btn-warning rounded mr-2">
-                            <i class="fas fa-edit"></i>
-                          </router-link >
-                          <button class="btn btn-sm btn-danger rounded" @click.prevent="destroy(furloughtype.id, index)">
-                            <i class="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <button type="button" class="btn btn-primary" data-toggle="modal" @click="showModal()">
+                <i class="fas fa-user-plus"></i>Tambah Tipe Cuti
+              </button>
+            </div>
+            <!-- <input type="text" v-model="per_page">
+            <input type="text" v-model="keyword" placeholder="keyword">
+            <button @click="getData()">Refresh</button> -->
+            <div class="card-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Tipe Cuti</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(furloughtype, index) in furloughtypes.data" :key="index">
+                    <td>{{ furloughtype.id }}</td>
+                    <td>{{ furloughtype.furlough_name }}</td>
+                    <td>
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-warning rounded mr-2" @click="showModalEdit(form = furloughtype)">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger rounded" @click="destroy(furloughtype.id)">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
-    </section>
-  </template>
-  
-  
-  <script>
-  
-  import axios from 'axios'
-  import {onMounted, ref} from 'vue'
-  
-  export default {
-      setup() {
-               // reative state
-          let furloughtypes = ref([]);
-  
-          onMounted(() => {
-              //get api
-              axios.get('http://127.0.0.1:8000/api/furloughtype')
-              .then((result) => {
-                  furloughtypes.value = result.data
-              }).catch((err) => {
-                  console.log(err.response)
-              });
-          });
-          function  destroy(id, index) {
-      axios.delete(`http://127.0.0.1:8000/api/furloughtype/${id}`
-            )
-            .then(() => {
-            furloughtypes.value.data.splice(index, 1)
-            }).catch((err) => {
-                console.log(err.response.data)
-            });
-          }
-  
-          return {
-              furloughtypes,
-              destroy
-          }
+      <!-- Modal -->
+      <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Tambah Tipe Cuti</h5>
+              <h5 class="modal-title" id="exampleModalLabel" v-show="statusModal"> Update Tipe Cuti</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form @submit.prevent="statusModal ? update() : storeData()">
+                <div class="mb-3">
+                  <label for="" class="form-label"> Tipe Cuti</label>
+                  <input type="text" class="form-control" v-model="form.furlough_name">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                  </button>
+                  <button type="submit" class="btn btn-primary" v-show="!statusModal">
+                    Simpan
+                  </button>
+                  <button type="submit" class="btn btn-primary" v-show="statusModal">
+                    Ubah
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+</template>
+
+<script>
+import axios from "axios";
+import env from "../../../env";
+
+export default {
+  data() {
+    return {
+      statusModal: false,
+      furloughtypes: [],
+      form: {
+        id: '',
+        furlough_name: ''
       }
-      
-  
-  }
-  </script>
-  
+    };
+  },
+
+  methods: {
+    showModal() {
+      this.statusModal = false,
+        $("#showModal").modal("show");
+    },
+    showModalEdit() {
+      this.statusModal = true;
+      $("#showModal").modal("show");
+
+    },
+    getData() {
+      let url = env.VUE_APP_URL + "furloughtype/";
+      axios
+        .get(url, {
+          params: {
+            per_page: this.per_page,
+            keyword: this.keyword,
+          },
+        })
+        .then((result) => {
+          this.furloughtypes = result.data;
+        })
+        .catch((err) => {
+          console.log(err.response);
+        });
+    },
+    storeData() {
+
+      let url = env.VUE_APP_URL + "furloughtype";
+      axios.post(url, this.form)
+        .then(() => {
+          this.getData()
+          $("#showModal").modal("hide")
+          this.$swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Tambah Tipe Cuti Berasil',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        })
+        .catch((err) => {
+          this.validation = err.response;
+        });
+    },
+    update() {
+      let url = env.VUE_APP_URL + 'furloughtype/' + this.form.id
+      axios.put(url, this.form)
+        .then(() => {
+          this.getData()
+          $("#showModal").modal("hide")
+          this.$swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Update Tipe Cuti Berasil',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        }).catch((err) => {
+          this.validation = err.response.data
+        })
+    },
+    destroy(id) {
+      this.$swal.fire({
+        title: 'Anda Yakin Mau Hapus?',
+        text: "data akan hilang!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Hapus!'
+      }).then((result) => {
+        if (result.value) {
+          let url = env.VUE_APP_URL + `furloughtype/${id}`
+          axios.delete(url)
+            .then(() => {
+              this.$swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: 'Delete Data Berasil',
+                showConfirmButton: false,
+                timer: 1500
+              })
+              this.getData();
+            }).catch(() => {
+              his.$swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: 'Delete Data Gagal',
+                showConfirmButton: false,
+                timer: 1500
+              })
+            })
+        }
+      })
+    }
+  },
+
+  mounted() {
+    this.getData();
+
+  },
+
+}
+</script>

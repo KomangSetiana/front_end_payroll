@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid">
     <div class="row mb-2">
-      <div class="col-sm-6">
+      <div class="col-sm-12">
         <h3>Daftar Perusahaan</h3>
       </div>
     </div>
@@ -10,12 +10,12 @@
   <section class="content">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-6">
+        <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <router-link :to="{name: 'company.create'}" class="btn btn-primary text-white">
-                <i class="fas fa-user-plus"></i> Tambah Perusahaan
-              </router-link>
+              <button type="button" class="btn btn-primary" data-toggle="modal" @click="showModal()">
+                <i class="fas fa-user-plus"></i>Tambah Perusahaan
+              </button>
             </div>
             <!-- <input type="text" v-model="per_page">
             <input type="text" v-model="keyword" placeholder="keyword">
@@ -35,10 +35,10 @@
                     <td>{{ company.company_name }}</td>
                     <td>
                       <div class="btn-group">
-                        <router-link :to="{name: 'company.update',params:{id: company.id }}" class="btn btn-sm btn-warning rounded mr-2">
+                        <button class="btn btn-sm btn-warning rounded mr-2" @click="showModalEdit(form = company)">
                           <i class="fas fa-edit"></i>
-                        </router-link>
-                        <button class="btn btn-sm btn-danger rounded" @click.prevent="destroy(company.id, index)">
+                        </button>
+                        <button class="btn btn-sm btn-danger rounded" @click="destroy(company.id)">
                           <i class="fas fa-trash-alt"></i>
                         </button>
                       </div>
@@ -50,53 +50,169 @@
           </div>
         </div>
       </div>
+      <!-- Modal -->
+      <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Tambah Perusahaan</h5>
+              <h5 class="modal-title" id="exampleModalLabel" v-show="statusModal"> Update Perusahaan</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form @submit.prevent="statusModal ? update() : storeData()">
+                <div class="mb-3">
+                  <label for="" class="form-label">Nama Perusahaan</label>
+                  <input type="text" class="form-control" v-model="form.company_name">
+                </div>
+                <div class="text-danger">
+                  {{ validation.company_name }}
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                  </button>
+                  <button type="submit" class="btn btn-primary" v-show="!statusModal">
+                    Simpan
+                  </button>
+                  <button type="submit" class="btn btn-primary" v-show="statusModal">
+                    Ubah
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
+
   </section>
 </template>
-  
-  
-<script>
 
-import axios from 'axios'
-import { onMounted, ref } from 'vue'
-import env from '../../../env'
+<script>
+import axios from "axios";
+import env from "../../../env";
 
 export default {
   data() {
     return {
+      statusModal: false,
       companies: [],
-      per_page:'',
-      keyword:'',
-      id: ''
-    }
+      validation: [],
+      form: {
+        id: '',
+        company_name: ''
+      }
+    };
   },
+
   methods: {
+    showModal() {
+
+      this.statusModal = false,
+        $("#showModal").modal("show");
+    },
+    showModalEdit() {
+      this.statusModal = true;
+      $("#showModal").modal("show");
+
+    },
     getData() {
-      let url = env.VUE_APP_URL + 'company/'
-      axios.get(url, {params : {
-        per_page : this.per_page,
-        keyword : this.keyword
-      }}).then((result) => {
-          this.companies = result.data
-        }).catch((err) => {
-          console.log(err.response)
+      let url = env.VUE_APP_URL + "company/";
+      axios
+        .get(url, {
+          params: {
+            per_page: this.per_page,
+            keyword: this.keyword,
+          },
+        })
+        .then((result) => {
+          this.companies = result.data;
+        })
+        .catch((err) => {
+          console.log(err.response);
         });
     },
-    destroy(id,index) {
-      let url = env.VUE_APP_URL + `company/${id}`
-      axios.delete(url)
+    storeData() {
+
+      let url = env.VUE_APP_URL + "company";
+      axios.post(url, this.form)
+        .then(() => {
+          this.getData()
+          $("#showModal").modal("hide")
+          this.$swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Tambah Perusahaan Berasil',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        })
+        .catch((err) => {
+          this.validation = err.response.data;
+        });
+    },
+    update() {
+      let url = env.VUE_APP_URL + 'company/' + this.form.id
+      axios.put(url, this.form)
+        .then(() => {
+          this.getData()
+          $("#showModal").modal("hide")
+          this.$swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Update Perusahaan Berasil',
+            showConfirmButton: false,
+            timer: 1500
+          })
+
+        }).catch((err) => {
+          this.validation = err.response.data
+        })
+    },
+    destroy(id) {
+      this.$swal.fire({
+        title: 'Anda Yakin Mau Hapus?',
+        text: "data akan hilang!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Hapus!'
+      }).then((result) => {
+        if (result.value) {
+          let url = env.VUE_APP_URL + `company/${id}`
+          axios.delete(url)
             .then(() => {
-            this.companies.data.splice(index, 1)
-            }).catch((err) => {
-                console.log(err.response.data)
-            });
+              this.$swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: 'Delete Data Berasil',
+                showConfirmButton: false,
+                timer: 1500
+              })
+              this.getData();
+            }).catch(() => {
+              his.$swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: 'Delete Data Gagal',
+                showConfirmButton: false,
+                timer: 1500
+              })
+            })
+        }
+      })
     }
   },
-  
   mounted() {
     this.getData();
-    this.destroy();
-  }
+
+  },
   // setup() {
   //   // reative state
   //   let companys = ref([]);
@@ -116,7 +232,7 @@ export default {
   //           }).catch((err) => {
   //               console.log(err.response.data)
   //           });
-    
+
   // }
 
   //   return {
@@ -124,10 +240,5 @@ export default {
   //     destroy
   //   }
   // }
-
-
-
-
-}
+};
 </script>
-  

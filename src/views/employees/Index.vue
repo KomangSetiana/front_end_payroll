@@ -34,7 +34,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(employee, index) in employees.data" :key="index">
-                    <td>{{ employee.id }}</td>
+                    <td>{{ index+1 }}</td>
                     <td>{{ employee.name }}</td>
                     <td>{{ employee.date_of_birth }}</td>
                     <td>{{ employee.address }}</td>
@@ -75,10 +75,16 @@
                 <div class="col-md-6">
                   <label for="name" class="form-label">Nama</label>
                   <input type="text" class="form-control" id="name" v-model="form.name">
+                  <div v-if="validation.name" class="text-danger">
+                    {{ validation.name[0] }}
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label for="nik" class="form-label">Nik</label>
                   <input type="number" class="form-control" id="inputPassword4" v-model="form.nik" />
+                  <div v-if="validation.nik" class="text-danger">
+                    {{ validation.nik[0] }}
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="inputState" class="form-label">Perusahaan</label>
@@ -86,6 +92,9 @@
                     <!-- <option  selected >pilih...</option> -->
                     <option v-for="company in companies.data" :value="company.id">{{ company.company_name }}</option>
                   </select>
+                  <div v-if="validation.company_id" class="text-danger">
+                    {{ validation.company_id[0] }}
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="inputState" class="form-label">Divisi</label>
@@ -94,6 +103,9 @@
                     <option v-for="division in divisions.data" :value="division.id"> {{ division.division_name }}
                     </option>
                   </select>
+                  <div v-if="validation.division_id" class="text-danger">
+                    {{ validation.division_id[0] }}
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="inputState" class="form-label">Jabatan</label>
@@ -102,18 +114,30 @@
                     <option v-for="posisition in posisitions.data" :value="posisition.id">{{ posisition.posisition_name
                     }}</option>
                   </select>
+                  <div v-if="validation.posisition_id" class="text-danger">
+                    {{ validation.posisition_id[0] }}
+                  </div>
                 </div>
                 <div class="col-12">
                   <label for="inputAddress2" class="form-label">Alamat</label>
                   <input type="text" class="form-control" id="inputAddress2" v-model="form.address" />
+                  <div v-if="validation.address" class="text-danger">
+                    {{ validation.address[0] }}
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="inputCity" class="form-label">Tempat Lahir</label>
                   <input type="text" class="form-control" id="inputCity" v-model="form.place_of_birth" />
+                  <div v-if="validation.place_of_birth" class="text-danger">
+                    {{ validation.place_of_birth[0] }}
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="inputZip" class="form-label">Tanggal Lahir</label>
                   <input type="date" class="form-control" id="inputZip" v-model="form.date_of_birth" />
+                  <div v-if="validation.date_of_birth" class="text-danger">
+                    {{ validation.date_of_birth[0] }}
+                  </div>
                 </div>
                 <div class="col-md-3">
                   <label for="inputState" class="form-label">Jenis Kelamin</label>
@@ -122,15 +146,24 @@
                     <option value="male"> Male</option>
                     <option value="female"> Female</option>
                   </select>
+                  <div v-if="validation.gender" class="text-danger">
+                    {{ validation.gender[0] }}
+                  </div>
                 </div>
 
                 <div class="col-md-4">
                   <label for="inputCity" class="form-label">Telepon</label>
                   <input type="number" class="form-control" id="inputCity" v-model="form.phone" />
+                  <div v-if="validation.phone" class="text-danger">
+                    {{ validation.phone[0] }}
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="inputCity" class="form-label">Agama</label>
                   <input type="text" class="form-control" id="inputCity" v-model="form.religion" />
+                  <div v-if="validation.religion" class="text-danger">
+                    {{ validation.religion[0] }}
+                  </div>
                 </div>
                 <div class="col-md-3">
                   <label for="inputState" class="form-label">Tipe</label>
@@ -139,6 +172,9 @@
                     <option value="contract">Contract</option>
                     <option value="daily">Daily</option>
                   </select>
+                  <div v-if="validation.type" class="text-danger">
+                    {{ validation.type[0] }}
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -161,7 +197,7 @@
     <nav aria-label="Page navigation example">
       <ul class="pagination">
         <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-        <li class="page-item"><a class="page-link" href="#">1</a></li>
+        <li  class="page-item"><a class="page-link" href="#">1</a></li>
         <li class="page-item"><a class="page-link" href="#">2</a></li>
         <li class="page-item"><a class="page-link" href="#">3</a></li>
         <li class="page-item"><a class="page-link" href="#">Next</a></li>
@@ -181,6 +217,7 @@ export default {
   data() {
     return {
       statusModal: false,
+      per_page: 5,
       employees: [],
       validation: [],
       companies: [],
@@ -206,17 +243,22 @@ export default {
   methods: {
 
     showModal() {
+      this.form ={}
+      this.validation = []
       this.statusModal = false,
         $("#showModal").modal("show")
     },
     showModalEdit() {
+
       this.statusModal = true,
+      this.getData()
         $("#showModal").modal("show")
     },
     getData() {
       let url = env.VUE_APP_URL + 'employee'
       axios.get(url, {
         params: {
+          per_page: this.per_page,
           keyword: this.keyword
         }
       })
@@ -240,7 +282,7 @@ export default {
             timer: 1500
           })
         }).catch((err) => {
-          this.validation = err.response
+          this.validation = err.response.data.errors
         })
     },
     update() {
@@ -256,6 +298,8 @@ export default {
             title: 'Update Karyawan Berasil',
             showConfirmButton: false,
             timer: 1500
+          }).catch((err) => {
+            this.validation = err.response.data.errors
           })
         })
     },

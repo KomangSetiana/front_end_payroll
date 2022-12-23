@@ -1,4 +1,5 @@
 <template>
+  <PageLoader/>
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -31,7 +32,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(company, index) in companies.data" :key="index">
-                    <td>{{ company.id }}</td>
+                    <td>{{ index+1 }}</td>
                     <td>{{ company.company_name }}</td>
                     <td>
                       <div class="btn-group">
@@ -65,8 +66,8 @@
                   <label for="" class="form-label">Nama Perusahaan</label>
                   <input type="text" class="form-control" v-model="form.company_name">
                 </div>
-                <div class="text-danger">
-                  {{ validation.company_name }}
+                <div v-if="validation.company_name"  class="text-danger">
+                  {{ validation.company_name[0] }}
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -81,9 +82,7 @@
                 </div>
               </form>
             </div>
-
           </div>
-
         </div>
 
       </div>
@@ -96,6 +95,7 @@
 <script>
 import axios from "axios";
 import env from "../../../env";
+import PageLoader from "../../components/PageLoader.vue";
 
 export default {
   data() {
@@ -109,15 +109,22 @@ export default {
       }
     };
   },
+  components: {
+    PageLoader
+  },
 
   methods: {
     showModal() {
-
+      this.form = {
+      },
+      this.validation =[]
       this.statusModal = false,
         $("#showModal").modal("show");
     },
     showModalEdit() {
+      this.validation = []
       this.statusModal = true;
+      this.getData()
       $("#showModal").modal("show");
 
     },
@@ -153,7 +160,7 @@ export default {
           })
         })
         .catch((err) => {
-          this.validation = err.response.data;
+          this.validation = err.response.data.errors;
         });
     },
     update() {
@@ -171,7 +178,7 @@ export default {
           })
 
         }).catch((err) => {
-          this.validation = err.response.data
+          this.validation = err.response.data.errors
         })
     },
     destroy(id) {

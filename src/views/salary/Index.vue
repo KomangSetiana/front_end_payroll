@@ -26,25 +26,48 @@
                     <th>Nama</th>
                     <th>Gaji Pokok</th>
                     <th>Status</th>
-                    <th>Tunjangan jabatan</th>
-                    <th>tunjangan Komunikasi</th>
-                    <th>Potongan BPJS</th>
-                    <th>Tunjngan Makan</th>
-                    <th>Tunjangan Kehadiran</th>
-                    <th>Tunjngan Transporstasi</th>
-                    <th>Tunjangan Lain</th>
+                    <th colspan="2">Tunjangan</th>
                     <th>Action</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr v-for="(salary, index) in salaries.data.allowances" :key="index">
-                    <td>{{ salary.id }}</td>
+                <template v-for="(salary, index) in salaries.data" :key="index">
+                  <tr>
+                    <td :rowspan="salary.allowances.length + 1">{{ index + 1 }}</td>
+                    <td :rowspan="salary.allowances.length + 1">{{ salary.employees.name }}</td>
+                    <td :rowspan="salary.allowances.length + 1">{{ salary.basic_salary }}</td>
+                    <td :rowspan="salary.allowances.length + 1">{{ salary.status }}</td>
+                    <td>Tunjangan {{ salary.allowances[0].allowance_type_id }}</td>
+                    <td>{{ salary.allowances[0].amount }}</td>
+                    <td :rowspan="salary.allowances.length + 1">
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-warning rounded mr-2" @click="showModalEdit(form = salary)">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button to="/" class="btn btn-sm btn-danger rounded ml-1">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr v-for="allwoance, j in salary.allowances">
+                    <template v-if="j > 0">
+                      <td>Tunjangan {{ allwoance.allowance_type_id }}</td>
+                      <td>{{ allwoance.amount }}</td>
+                    </template>
+                  </tr>
+
+                  <!-- <tr v-for="(allowance) in salary.allowances"  >
+                    <td>{{ index+1 }}</td>
                     <td>{{ salary.employees.name }}</td>
                     <td>{{ salary.basic_salary }}</td>
                     <td>{{ salary.status }}</td>
-                    <td>{{ salary.allowances.amount }}</td>
-                    <td>{{ salary.gender }}</td>
-                    <td>{{ salary.type }}</td>
+                    <td>{{ allowance.amount }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td>
                       <div class="btn-group">
 
@@ -56,8 +79,9 @@
                         </button>
                       </div>
                     </td>
-                  </tr>
-                </tbody>
+                  </tr> -->
+
+                </template>
               </table>
             </div>
           </div>
@@ -67,7 +91,7 @@
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Insert Gaji Karyawan</h5>
+              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Masukan Gaji Karyawan</h5>
               <h5 class="modal-title" id="exampleModalLabel" v-show="statusModal"> Update Gaji Karyawan</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -144,8 +168,10 @@ import env from '../../../env'
 export default {
   data() {
     return {
+
       statusModal: false,
       salaries: [],
+      allowances: [],
       validation: [],
       form: {
         id: '',

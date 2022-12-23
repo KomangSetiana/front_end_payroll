@@ -32,7 +32,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(allowancetype, index) in allowancetypes.data" :key="index">
-                    <td>{{ allowancetype.id }}</td>
+                    <td>{{ index+1 }}</td>
                     <td>{{ allowancetype.allowance_name }}</td>
                     <td>{{ allowancetype.status }}</td>
                     <td>
@@ -58,8 +58,8 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Tambah Divisi</h5>
-              <h5 class="modal-title" id="exampleModalLabel" v-show="statusModal"> Update Divisi</h5>
+              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Tambah Tipe Tunjangan</h5>
+              <h5 class="modal-title" id="exampleModalLabel" v-show="statusModal"> Update Tipe Tunjangan</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -67,11 +67,17 @@
                 <div class="mb-3">
                   <label for="" class="form-label">Tipe Tunjangan</label>
                   <input type="text" class="form-control" v-model="form.allowance_name">
+                  <div v-if="validation.allowance_name" class="text-danger">
+                    {{ validation.allowance_name[0] }}
+                  </div>
                   <label for="" class="form-label">Status</label>
                   <select id="" class="form-select" v-model="form.status">
                     <option value="permanent">Permanen</option>
                     <option value="non_permanent">Tidak Permanen</option>
                   </select>
+                  <div v-if="validation.status" class="text-danger">
+                    {{ validation.status[0] }}
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -106,6 +112,7 @@ export default {
   data() {
     return {
       statusModal: false,
+      validation: [],
       allowancetypes: [],
       form: {
         id: '',
@@ -117,11 +124,15 @@ export default {
 
   methods: {
     showModal() {
+      this.form ={}
+      this.validation = []
       this.statusModal = false,
         $("#showModal").modal("show");
     },
     showModalEdit() {
       this.statusModal = true;
+      this.validation =[]
+      this.getData()
       $("#showModal").modal("show");
 
     },
@@ -157,7 +168,7 @@ export default {
           })
         })
         .catch((err) => {
-          this.validation = err.response;
+          this.validation = err.response.data.errors;
         });
     },
     update() {
@@ -174,7 +185,7 @@ export default {
             timer: 1500
           })
         }).catch((err) => {
-          this.validation = err.response.data
+          this.validation = err.response.data.errors
         })
     },
     destroy(id) {

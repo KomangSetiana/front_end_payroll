@@ -28,7 +28,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(posisition, index) in posisitions.data" :key="index">
-                    <td>{{ posisition.id }}</td>
+                    <td>{{ index+1 }}</td>
                     <td>{{ posisition.posisition_name }}</td>
                     <td>
                       <div class="btn-group">
@@ -61,6 +61,9 @@
                 <div class="mb-3">
                   <label for="" class="form-label"> Jabatan</label>
                   <input type="text" class="form-control" v-model="form.posisition_name">
+                  <div v-if="validation.posisition_name" class="text-danger">
+                    {{ validation.posisition_name[0] }}
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -95,6 +98,7 @@ export default {
   data() {
     return {
       statusModal: false,
+      validation: [],
       posisitions: [],
       form: {
         id: '',
@@ -105,11 +109,15 @@ export default {
 
   methods: {
     showModal() {
+      this.validation = []
+      this.form = {}
       this.statusModal = false,
         $("#showModal").modal("show");
     },
     showModalEdit() {
+      this.validation = []
       this.statusModal = true;
+      this.getData()
       $("#showModal").modal("show");
 
     },
@@ -145,7 +153,7 @@ export default {
           })
         })
         .catch((err) => {
-          this.validation = err.response;
+          this.validation = err.response.data.errors;
         });
     },
     update() {
@@ -162,7 +170,7 @@ export default {
             timer: 1500
           })
         }).catch((err) => {
-          this.validation = err.response.data
+          this.validation = err.response.data.errors
         })
     },
     destroy(id) {

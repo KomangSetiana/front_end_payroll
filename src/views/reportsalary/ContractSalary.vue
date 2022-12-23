@@ -33,7 +33,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(contractsalary, index) in contractsalarys.data" :key="index">
-                    <td>{{ contractsalary.id }}</td>
+                    <td>{{ index+1 }}</td>
                     <td>{{ contractsalary.division_name }}</td>
                     <td>{{ contractsalary.name }}</td>
                     <td>{{ contractsalary.basic_salary }}</td>

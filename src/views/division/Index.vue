@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
-        <h3>Daftar Perusahaan</h3>
+        <h3>Daftar Divisi</h3>
       </div>
     </div>
   </div>
@@ -31,7 +31,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(division, index) in divisions.data" :key="index">
-                    <td>{{ division.id }}</td>
+                    <td>{{ index+1 }}</td>
                     <td>{{ division.division_name }}</td>
                     <td>
                       <div class="btn-group">
@@ -64,6 +64,9 @@
                 <div class="mb-3">
                   <label for="" class="form-label">Divisi</label>
                   <input type="text" class="form-control" v-model="form.division_name">
+                  <div v-if="validation.division_name" class="text-danger">
+                    {{ validation.division_name[0] }}
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -97,6 +100,7 @@ export default {
     return {
       statusModal: false,
       divisions: [],
+      validation: [],
       form: {
         id: '',
         division_name: ''
@@ -105,12 +109,17 @@ export default {
   },
 
   methods: {
+    
     showModal() {
+      this.form = {}  
+      this.validation = []
       this.statusModal = false,
         $("#showModal").modal("show");
     },
     showModalEdit() {
+      this.validation = []
       this.statusModal = true;
+      this.getData()
       $("#showModal").modal("show");
 
     },
@@ -146,7 +155,7 @@ export default {
           })
         })
         .catch((err) => {
-          this.validation = err.response;
+          this.validation = err.response.data.errors;
         });
     },
     update() {
@@ -163,7 +172,7 @@ export default {
             timer: 1500
           })
         }).catch((err) => {
-          this.validation = err.response.data
+          this.validation = err.response.data.errors
         })
     },
     destroy(id) {

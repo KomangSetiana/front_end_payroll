@@ -31,7 +31,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(furloughtype, index) in furloughtypes.data" :key="index">
-                    <td>{{ furloughtype.id }}</td>
+                    <td>{{ index + 1 }}</td>
                     <td>{{ furloughtype.furlough_name }}</td>
                     <td>
                       <div class="btn-group">
@@ -64,6 +64,9 @@
                 <div class="mb-3">
                   <label for="" class="form-label"> Tipe Cuti</label>
                   <input type="text" class="form-control" v-model="form.furlough_name">
+                  <div v-if="validation.furlough_name" class="text-danger">
+                    {{ validation.furlough_name[0] }}
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -98,6 +101,7 @@ export default {
   data() {
     return {
       statusModal: false,
+      validation: [],
       furloughtypes: [],
       form: {
         id: '',
@@ -108,11 +112,15 @@ export default {
 
   methods: {
     showModal() {
+      this.form = {}
+      this.validation = []
       this.statusModal = false,
         $("#showModal").modal("show");
     },
     showModalEdit() {
       this.statusModal = true;
+      this.validation = []
+      this.getData()
       $("#showModal").modal("show");
 
     },
@@ -148,7 +156,7 @@ export default {
           })
         })
         .catch((err) => {
-          this.validation = err.response;
+          this.validation = err.response.data.errors;
         });
     },
     update() {
@@ -165,7 +173,7 @@ export default {
             timer: 1500
           })
         }).catch((err) => {
-          this.validation = err.response.data
+          this.validation = err.response.data.errors
         })
     },
     destroy(id) {

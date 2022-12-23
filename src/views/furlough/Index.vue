@@ -34,7 +34,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(furlough, index) in furloughs.data" :key="index">
-                    <td>{{ furlough.id }}</td>
+                    <td>{{ index+1 }}</td>
                     <td>{{ furlough.employees.name }}</td>
                     <td>{{ furlough.furlough_types.furlough_name }}</td>
                     <td>{{ furlough.date }}</td>
@@ -61,8 +61,8 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Tambah Divisi</h5>
-              <h5 class="modal-title" id="exampleModalLabel" v-show="statusModal"> Update Divisi</h5>
+              <h5 class="modal-title" id="exampleModalLabel" v-show="!statusModal"> Tambah Cuti</h5>
+              <h5 class="modal-title" id="exampleModalLabel" v-show="statusModal"> Update Cuti</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -72,16 +72,28 @@
                   <select v-model="form.employee_id" id="" class="form-select">
                     <option v-for="employee in employees.data" :value="employee.id">{{ employee.name }}</option>
                   </select>
+                  <div v-if="validation.employee_id" class="text-danger">
+                    {{ validation.employee_id[0] }}
+                  </div>
                   <label for="" class="form-label">Tipe Cuti</label>
                   <select v-model="form.furlough_type_id" id="" class="form-select">
                     <option v-for="furloughType in furloughTypes.data" :value="furloughType.id">{{
                         furloughType.furlough_name
                     }}</option>
                   </select>
+                  <div v-if="validation.furlough_type_id" class="text-danger">
+                    {{ validation.furlough_type_id[0] }}
+                  </div>
                   <label for="" class="form-label">Tanggal</label>
-                  <input type="text" class="form-control" v-model="form.date">
+                  <input type="date" class="form-control" v-model="form.date">
+                  <div v-if="validation.date" class="text-danger">
+                    {{ validation.date[0] }}
+                  </div>
                   <label for="floatingTextarea2">Deskripsi</label>
                   <input type="text" class="form-control" v-model="form.description">
+                  <div v-if="validation.description" class="text-danger">
+                    {{ validation.description[0] }}
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -124,6 +136,7 @@ export default {
       statusModal: false,
       furloughs: [],
       employees: [],
+      validation: [],
       furloughTypes: [],
       form: {
         id: '',
@@ -145,11 +158,15 @@ export default {
 
   methods: {
     showModal() {
+      this.form ={}
+      this.validation = []
       this.statusModal = false,
         $("#showModal").modal("show");
     },
     showModalEdit() {
       this.statusModal = true;
+      this.validation = []
+      this.getData()
       $("#showModal").modal("show");
 
     },
@@ -180,7 +197,7 @@ export default {
           })
         })
         .catch((err) => {
-          this.validation = err.response;
+          this.validation = err.response.data.errors;
         });
     },
     update() {
@@ -197,7 +214,7 @@ export default {
             timer: 1500
           })
         }).catch((err) => {
-          this.validation = err.response.data
+          this.validation = err.response.data.errors
         })
     },
     destroy(id) {
@@ -264,3 +281,7 @@ export default {
   }
 }
 </script>
+
+<style>
+@import "vue-select/dist/vue-select.css";
+</style>

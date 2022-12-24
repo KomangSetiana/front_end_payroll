@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="furloughs.length <= 0" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -33,7 +34,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(furlough, index) in furloughs.data" :key="index">
+                  <tr v-for="(furlough, index) in furloughs" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ furlough.employees.name }}</td>
                     <td>{{ furlough.furlough_types.furlough_name }}</td>
@@ -129,6 +130,7 @@
 <script>
 import axios from "axios";
 import env from "../../../env";
+import PageLoader from "../../components/PageLoader.vue";
 
 export default {
   data() {
@@ -155,7 +157,9 @@ export default {
       }
     };
   },
-
+components: {
+  PageLoader
+},
   methods: {
     showModal() {
       this.form ={}
@@ -175,7 +179,7 @@ export default {
       axios
         .get(url)
         .then((result) => {
-          this.furloughs = result.data
+          this.furloughs = result.data.data
         })
         .catch((err) => {
           console.log(err.response);

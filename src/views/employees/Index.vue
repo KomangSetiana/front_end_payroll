@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="employees.length <= 0"/>
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
@@ -33,7 +34,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(employee, index) in employees.data" :key="index">
+                  <tr v-for="(employee, index) in employees" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ employee.name }}</td>
                     <td>{{ employee.date_of_birth }}</td>
@@ -88,7 +89,7 @@
                 </div>
                 <div class="col-md-4">
                   <label for="inputState" class="form-label">Perusahaan</label>
-                  <select id="inputState" class="form-select" v-model="form.company_id">
+                  <select id="inputState" class="form-select" v-model="form.company_id" >
                     <!-- <option  selected >pilih...</option> -->
                     <option v-for="company in companies.data" :value="company.id">{{ company.company_name }}</option>
                   </select>
@@ -99,7 +100,7 @@
                 <div class="col-md-4">
                   <label for="inputState" class="form-label">Divisi</label>
                   <select id="inputState" class="form-select" v-model="form.division_id">
-                    <option selected>pilih...</option>
+                    <option selected></option>
                     <option v-for="division in divisions.data" :value="division.id"> {{ division.division_name }}
                     </option>
                   </select>
@@ -211,168 +212,172 @@
 
 import axios from 'axios'
 import env from '../../../env'
+import PageLoader from '../../components/PageLoader.vue'
 
 
 export default {
-  data() {
-    return {
-      statusModal: false,
-      per_page: 5,
-      employees: [],
-      validation: [],
-      companies: [],
-      divisions: [],
-      posisitions: [],
-      form: {
-        id: '',
-        companies: {
-          id: '',
-          company_name: ''
+    data() {
+        return {
+            statusModal: false,
+            per_page: '',
+            employees: [],
+            validation: [],
+            companies: [],
+            divisions: [],
+            posisitions: [],
+            form: {
+                id: "",
+                companies: {
+                    id: "",
+                    company_name: ""
+                },
+                posisitions: {
+                    id: "",
+                    posisition_name: "",
+                },
+                divisions: {
+                    id: "",
+                    division_name: ""
+                }
+            }
+        };
+    },
+    components: {
+      PageLoader
+    },
+    methods: {
+        showModal() {
+            this.form = {};
+            this.validation = [];
+            this.statusModal = false,
+                $("#showModal").modal("show");
         },
-        posisitions: {
-          id: '',
-          posisition_name: '',
+        showModalEdit() {
+      
+            this.statusModal = true,
+            this.validation = []
+                this.getData();
+            $("#showModal").modal("show");
         },
-        divisions: {
-          id: '',
-          division_name: ''
-        }
-      }
-    }
-  },
-  methods: {
-
-    showModal() {
-      this.form ={}
-      this.validation = []
-      this.statusModal = false,
-        $("#showModal").modal("show")
-    },
-    showModalEdit() {
-
-      this.statusModal = true,
-      this.getData()
-        $("#showModal").modal("show")
-    },
-    getData() {
-      let url = env.VUE_APP_URL + 'employee'
-      axios.get(url, {
-        params: {
-          per_page: this.per_page,
-          keyword: this.keyword
-        }
-      })
-        .then((result) => {
-          this.employees = result.data
-        }).catch((err) => {
-          console.log(err.response.data)
-        })
-    },
-    storeData() {
-      let url = env.VUE_APP_URL + 'employee'
-      axios.post(url, this.form)
-        .then(() => {
-          this.getData()
-          $("#showModal").modal("hide")
-          this.$swal.fire({
-            position: 'center',
-            icon: 'success',
-            title: 'Tambah Karyawan Berasil',
-            showConfirmButton: false,
-            timer: 1500
-          })
-        }).catch((err) => {
-          this.validation = err.response.data.errors
-        })
-    },
-    update() {
-      let url = env.VUE_APP_URL + 'employee/' + this.form.id
-
-      axios.put(url, this.form)
-        .then(() => {
-          this.getData()
-          $("#showModal").modal("hide")
-          this.$swal.fire({
-            position: 'center',
-            icon: 'success',
-            title: 'Update Karyawan Berasil',
-            showConfirmButton: false,
-            timer: 1500
-          }).catch((err) => {
-            this.validation = err.response.data.errors
-          })
-        })
-    },
-    destroy(id) {
-      this.$swal.fire({
-        title: 'Anda Yakin Mau Hapus ?',
-        text: "Data Akan Hilang!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        cancelButtonText: 'Tidak',
-        confirmButtonText: 'Ya, Yakin!'
-      }).then((result) => {
-        if (result.value) {
-          let url = env.VUE_APP_URL + `employee/${id}`
-          axios.delete(url)
-            .then(() => {
-              this.$swal.fire({
-                position: 'center',
-                icon: 'success',
-                title: 'Delete Data Berasil',
-                showConfirmButton: false,
-                timer: 1500
-              })
-              this.getData();
-            }).catch(() => {
-              his.$swal.fire({
-                position: 'center',
-                icon: 'error',
-                title: 'Delete Data Gagal',
-                showConfirmButton: false,
-                timer: 1500
-              })
+        getData() {
+            let url = env.VUE_APP_URL + "employee";
+            axios.get(url, {
+                params: {
+                    per_page: this.per_page,
+                    keyword: this.keyword
+                }
             })
+                .then((result) => {
+                  console.log(result)
+                this.employees = result.data.data;
+            }).catch((err) => {
+                console.log(err.response.data);
+            });
+        },
+        storeData() {
+            let url = env.VUE_APP_URL + "employee";
+            axios.post(url, this.form)
+                .then(() => {
+                this.getData();
+                $("#showModal").modal("hide");
+                this.$swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Tambah Karyawan Berasil",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }).catch((err) => {
+              this.validation = err.response.data.errors;
+            });
+        },
+        update() {
+            let url = env.VUE_APP_URL + "employee/" + this.form.id;
+            axios.put(url, this.form)
+                .then(() => {
+                this.getData();
+                $("#showModal").modal("hide");
+                this.$swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Update Karyawan Berasil",
+                    showConfirmButton: false,
+                    timer: 1500
+                }).catch((err) => {
+                    this.validation = err.response.data.errors;
+                });
+            });
+        },
+        destroy(id) {
+            this.$swal.fire({
+                title: "Anda Yakin Mau Hapus ?",
+                text: "Data Akan Hilang!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                cancelButtonText: "Tidak",
+                confirmButtonText: "Ya, Yakin!"
+            }).then((result) => {
+                if (result.value) {
+                    let url = env.VUE_APP_URL + `employee/${id}`;
+                    axios.delete(url)
+                        .then(() => {
+                        this.$swal.fire({
+                            position: "center",
+                            icon: "success",
+                            title: "Delete Data Berasil",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        this.getData();
+                    }).catch(() => {
+                        his.$swal.fire({
+                            position: "center",
+                            icon: "error",
+                            title: "Delete Data Gagal",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    });
+                }
+            });
+        },
+        getCompany() {
+            let url = env.VUE_APP_URL + "company";
+            axios.get(url)
+                .then((result) => {
+                this.companies = result.data;
+            }).catch((err) => {
+                this.validation = err.response.data;
+            });
+        },
+        getDivision() {
+            let url = env.VUE_APP_URL + "division";
+            axios.get(url)
+                .then((result) => {
+                this.divisions = result.data;
+            }).catch((err) => {
+                this.validation = err.response.data;
+            });
+        },
+        getPosisition() {
+            let url = env.VUE_APP_URL + "posisition";
+            axios.get(url)
+                .then((result) => {
+                this.posisitions = result.data;
+            }).catch((err) => {
+                this.validation = err.response.data;
+            });
         }
-      })
     },
-    getCompany() {
-      let url = env.VUE_APP_URL + 'company'
-      axios.get(url)
-        .then((result) => {
-          this.companies = result.data
-        }).catch((err) => {
-          this.validation = err.response.data
-        })
+    mounted() {
+        this.getData();
+        this.getCompany();
+        this.getDivision();
+        this.getPosisition();
     },
-    getDivision() {
-      let url = env.VUE_APP_URL + 'division'
-      axios.get(url)
-        .then((result) => {
-          this.divisions = result.data
-        }).catch((err) => {
-          this.validation = err.response.data
-        })
-    },
-    getPosisition() {
-      let url = env.VUE_APP_URL + 'posisition'
-      axios.get(url)
-        .then((result) => {
-          this.posisitions = result.data
-        }).catch((err) => {
-          this.validation = err.response.data
-        })
-    }
-  },
-  mounted() {
-    this.getData();
-    this.getCompany();
-    this.getDivision();
-    this.getPosisition();
-  }
-
+    components: { PageLoader }
 }
 </script>
   

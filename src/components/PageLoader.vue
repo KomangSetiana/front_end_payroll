@@ -1,34 +1,17 @@
 <template>
-    <div class="page-loader" v-if="!isloaded">
-        <div class="cube"></div>
-        <div class="cube"></div>
-        <div class="cube"></div>
-        <div class="cube"></div>
-    </div>
+  <div class="page-loader">
+    <div class="cube"></div>
+    <div class="cube"></div>
+    <div class="cube"></div>
+    <div class="cube"></div>
+  </div> 
 </template>
-  
-<script>
-export default {
-    data: () => {
-        return {
-            isloaded: false
-        }
-    },
-    mounted() {
-        document.onreadystatechange = () => {
-            if (document.readyState == "complete") {
-                this.isloaded = true;
-            }
-        }
-    },
-}
-</script>
-  
-<style lang="scss" scoped>
-$colors: #8CC271, #69BEEB, #F5AA39, #E9643B;
 
-// -----------------------------------------------------
-.page-loader {
+
+<style lang="scss" scoped>
+   $colors: #e21009, #dfe20f, #0fac17, #1013b1;
+  // -----------------------------------------------------
+  .page-loader {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -37,49 +20,41 @@ $colors: #8CC271, #69BEEB, #F5AA39, #E9643B;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: #333;
+    background-color: rgb(243, 241, 241);
     z-index: 999;
-}
-
-// -----------------------------------------------------
-.cube {
-    width: 40px;
-    height: 40px;
+  }
+  // -----------------------------------------------------
+  .cube{
+    width: 20px;
+    height: 20px;
     margin-right: 10px;
-
     @for $i from 1 through length($colors) {
-        &:nth-child(#{$i}) {
-            background-color: nth($colors, $i);
-        }
+      &:nth-child(#{$i}) {
+        background-color: nth($colors, $i);
+      }
     }
-
     &:first-child {
-        animation: left 1s infinite;
+      animation: left 1s infinite;
     }
-
     &:last-child {
-        animation: right 1s infinite .5s;
+      animation: right 1s infinite .5s;
     }
-}
-
-// -----------------------------------------------------
-@keyframes left {
+  }
+  // -----------------------------------------------------
+  @keyframes left {
     40% {
-        transform: translateX(-60px);
+      transform: translateX(-60px);
     }
-
     50% {
-        transform: translateX(0);
+      transform: translateX(0);      
     }
-}
-
-@keyframes right {
+  }
+  @keyframes right {
     40% {
-        transform: translateX(60px);
+      transform: translateX(60px);
     }
-
     50% {
-        transform: translateX(0);
+      transform: translateX(0);
     }
-}
+  }
 </style>

@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="dailysalarys.length <= 0" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
@@ -58,6 +59,7 @@
 
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
+import PageLoader from "../../components/PageLoader.vue";
 
 export default {
   setup() {
@@ -77,6 +79,9 @@ export default {
     return {
       dailysalarys
     }
+  },
+  components: {
+    PageLoader
   }
 
 

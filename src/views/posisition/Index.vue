@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="posisitions.length <= 0" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -27,7 +28,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(posisition, index) in posisitions.data" :key="index">
+                  <tr v-for="(posisition, index) in posisitions" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ posisition.posisition_name }}</td>
                     <td>
@@ -93,6 +94,7 @@
 <script>
 import axios from "axios";
 import env from "../../../env";
+import PageLoader from "../../components/PageLoader.vue";
 
 export default {
   data() {
@@ -105,6 +107,9 @@ export default {
         posisition_name: ''
       }
     };
+  },
+  components: {
+    PageLoader
   },
 
   methods: {
@@ -131,7 +136,7 @@ export default {
           },
         })
         .then((result) => {
-          this.posisitions = result.data;
+          this.posisitions = result.data.data;
         })
         .catch((err) => {
           console.log(err.response);

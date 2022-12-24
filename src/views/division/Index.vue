@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="divisions.length <= 0" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -30,7 +31,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(division, index) in divisions.data" :key="index">
+                  <tr v-for="(division, index) in divisions" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ division.division_name }}</td>
                     <td>
@@ -94,6 +95,7 @@
 <script>
 import axios from "axios";
 import env from "../../../env";
+import PageLoader from "../../components/PageLoader.vue";
 
 export default {
   data() {
@@ -106,6 +108,9 @@ export default {
         division_name: ''
       }
     };
+  },
+  components: {
+    PageLoader
   },
 
   methods: {
@@ -133,7 +138,7 @@ export default {
           },
         })
         .then((result) => {
-          this.divisions = result.data;
+          this.divisions = result.data.data;
         })
         .catch((err) => {
           console.log(err.response);

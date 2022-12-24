@@ -1,5 +1,5 @@
 <template>
-  <PageLoader/>
+  <PageLoader v-if="companies.length <= 0"/>
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -31,7 +31,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(company, index) in companies.data" :key="index">
+                  <tr v-for="(company, index) in companies" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ company.company_name }}</td>
                     <td>
@@ -138,7 +138,7 @@ export default {
           },
         })
         .then((result) => {
-          this.companies = result.data;
+          this.companies = result.data.data;
         })
         .catch((err) => {
           console.log(err.response);

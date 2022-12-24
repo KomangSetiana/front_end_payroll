@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="contractsalarys.length <= 0" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
@@ -32,7 +33,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(contractsalary, index) in contractsalarys.data" :key="index">
+                  <tr v-for="(contractsalary, index) in contractsalarys" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ contractsalary.division_name }}</td>
                     <td>{{ contractsalary.name }}</td>
@@ -64,6 +65,7 @@
 
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
+import PageLoader from "../../components/PageLoader.vue";
 
 export default {
   setup() {
@@ -74,7 +76,7 @@ export default {
       //get api
       axios.get('http://127.0.0.1:8000/api/contractsalary')
         .then((result) => {
-          contractsalarys.value = result.data
+          contractsalarys.value = result.data.data
         }).catch((err) => {
           console.log(err.response)
         });
@@ -83,6 +85,9 @@ export default {
     return {
       contractsalarys
     }
+  },
+  components : {
+    PageLoader
   }
 
 

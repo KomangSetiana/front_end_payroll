@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="allowancetypes.length <= 0" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -31,7 +32,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(allowancetype, index) in allowancetypes.data" :key="index">
+                  <tr v-for="(allowancetype, index) in allowancetypes" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ allowancetype.allowance_name }}</td>
                     <td>{{ allowancetype.status }}</td>
@@ -107,6 +108,7 @@
 <script>
 import axios from "axios";
 import env from "../../../env";
+import PageLoader from "../../components/PageLoader.vue";
 
 export default {
   data() {
@@ -121,7 +123,9 @@ export default {
       }
     };
   },
-
+components: {
+  PageLoader
+},
   methods: {
     showModal() {
       this.form ={}
@@ -146,7 +150,7 @@ export default {
           },
         })
         .then((result) => {
-          this.allowancetypes = result.data;
+          this.allowancetypes = result.data.data;
         })
         .catch((err) => {
           console.log(err.response);

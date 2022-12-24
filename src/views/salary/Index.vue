@@ -1,4 +1,5 @@
 <template>
+  <PageLoader v-if="salaries.length <= 0" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
@@ -30,17 +31,18 @@
                     <th>Action</th>
                   </tr>
                 </thead>
-                <template v-for="(salary, index) in salaries.data" :key="index">
+                <template v-for="(salary, index) in salaries" :key="index">
                   <tr>
                     <td :rowspan="salary.allowances.length + 1">{{ index + 1 }}</td>
                     <td :rowspan="salary.allowances.length + 1">{{ salary.employees.name }}</td>
                     <td :rowspan="salary.allowances.length + 1">{{ salary.basic_salary }}</td>
                     <td :rowspan="salary.allowances.length + 1">{{ salary.status }}</td>
-                    <td>Tunjangan {{ salary.allowances[0].allowance_type_id }}</td>
+                    <td>Tunjangan Jabatan {{ salary.allowances[0].allowance_name }}</td>
                     <td>{{ salary.allowances[0].amount }}</td>
                     <td :rowspan="salary.allowances.length + 1">
                       <div class="btn-group">
-                        <button class="btn btn-sm btn-warning rounded mr-2" @click="showModalEdit(form = salary)">
+                        <button class="btn btn-sm btn-warning rounded mr-2"
+                          @click="showModalEdit(form = salary.allowances)">
                           <i class="fas fa-edit"></i>
                         </button>
                         <button to="/" class="btn btn-sm btn-danger rounded ml-1">
@@ -51,36 +53,10 @@
                   </tr>
                   <tr v-for="allwoance, j in salary.allowances">
                     <template v-if="j > 0">
-                      <td>Tunjangan {{ allwoance.allowance_type_id }}</td>
+                      <td>{{ allwoance.allowance_types.allowance_name }}</td>
                       <td>{{ allwoance.amount }}</td>
                     </template>
                   </tr>
-
-                  <!-- <tr v-for="(allowance) in salary.allowances"  >
-                    <td>{{ index+1 }}</td>
-                    <td>{{ salary.employees.name }}</td>
-                    <td>{{ salary.basic_salary }}</td>
-                    <td>{{ salary.status }}</td>
-                    <td>{{ allowance.amount }}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                      <div class="btn-group">
-
-                        <button class="btn btn-sm btn-warning rounded mr-2" @click="showModalEdit(form = salary)">
-                          <i class="fas fa-edit"></i>
-                        </button>
-                        <button to="/" class="btn btn-sm btn-danger rounded ml-1">
-                          <i class="fas fa-trash-alt"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr> -->
-
                 </template>
               </table>
             </div>
@@ -99,19 +75,25 @@
               <form class="row" @submit.prevent="statusModal ? update() : storeData()">
                 <div class="col-md-6">
                   <label for="name" class="form-label">Nama</label>
-                  <input type="text" class="form-control" id="name" v-model="form.name">
+                  <select id="inputState" class="form-select" v-model="form.posisition_id">
+                    <option selected></option>
+                    <option v-for="employee in employees.data" :value="employee.id">{{ employee.name }}</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
                   <label for="nik" class="form-label">Gaji Pokok</label>
-                  <input type="number" class="form-control" id="inputPassword4" v-model="form.nik" />
+                  <input type="number" class="form-control" id="inputPassword4" v-model="form.basic_salary" />
                 </div>
                 <div class="col-md-6">
                   <label for="name" class="form-label">Status</label>
-                  <input type="text" class="form-control" id="name" v-model="form.name">
+                  <select id="inputState" class="form-select" v-model="form.status">
+                    <option value="1">Kontrak</option>
+                    <option value="0">Harian</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
                   <label for="nik" class="form-label">Tunjangan Jabatan</label>
-                  <input type="number" class="form-control" id="inputPassword4" v-model="form.nik" />
+                  <input type="number" class="form-control" id="inputPassword4" v-model="form.allowances" />
                 </div>
                 <div class="col-md-6">
                   <label for="name" class="form-label">Tunjangan Komunikasi</label>
@@ -163,6 +145,7 @@
 
 import axios from 'axios'
 import env from '../../../env'
+import PageLoader from "../../components/PageLoader.vue";
 
 
 export default {
@@ -173,15 +156,20 @@ export default {
       salaries: [],
       allowances: [],
       validation: [],
+      employees: [],
       form: {
         id: '',
 
       }
     }
   },
+  components: {
+    PageLoader
+  },
   methods: {
 
     showModal() {
+      this.form = {}
       this.statusModal = false,
         $("#showModal").modal("show")
     },
@@ -193,7 +181,7 @@ export default {
       let url = env.VUE_APP_URL + 'employee-salary'
       axios.get(url)
         .then((result) => {
-          this.salaries = result.data
+          this.salaries = result.data.data
         }).catch((err) => {
           console.log(err.response.data)
         })
@@ -217,11 +205,19 @@ export default {
           $("#showmodal").modal("hide")
         })
     },
+    getEmployees() {
+      let url = env.VUE_APP_URL + 'employee/'
+      axios.get(url)
+        .then((result) => {
+          this.employees = result.data
+        })
+    }
 
 
   },
   mounted() {
     this.getData();
+    this.getEmployees();
   }
 
 }

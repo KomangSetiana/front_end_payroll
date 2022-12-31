@@ -1,5 +1,5 @@
 <template>
-  <PageLoader v-if="dailysalarys.length <= 0" />
+  <PageLoader v-if="dailysalaries.length <= 0 ? dailysalaries.length : load" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
@@ -30,7 +30,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(dailysalary, index) in dailysalarys.data" :key="index">
+                  <tr v-for="(dailysalary, index) in dailysalaries" :key="index">
                     <td>{{ index+1 }}</td>
                     <td>{{ dailysalary.division_name }}</td>
                     <td>{{ dailysalary.name }}</td>
@@ -38,9 +38,9 @@
                     <td>{{ dailysalary.salary }}</td>
                     <td>
                       <div class="btn-group">
-                        <router-link to="/dailysalarys/show/:id" class="btn btn-sm btn-outline-info rounded mr-1">
-                          detail
-                        </router-link>
+                       <router-link :to="{name : 'daily-salary.show',params:{id: dailysalary.id} }" class="btn btn-info">
+                        <i class="fas fa-eye"></i> detail
+                       </router-link>
                       </div>
                     </td>
                   </tr>
@@ -58,31 +58,36 @@
 <script>
 
 import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import env from '../../../env'
 import PageLoader from "../../components/PageLoader.vue";
 
 export default {
-  setup() {
-    // reative state
-    let dailysalarys = ref([]);
-
-    onMounted(() => {
-      //get api
-      axios.get('http://127.0.0.1:8000/api/dailysalary')
+  data() {
+    return {
+      dailysalaries: [],
+      load: []
+    }
+  },
+  methods: {
+    getData() {
+      let url = env.VUE_APP_URL + "dailysalary";
+      axios.get(url)
         .then((result) => {
-          dailysalarys.value = result.data
+          this.dailysalaries = result.data.data;
         }).catch((err) => {
           console.log(err.response)
         });
-    });
-
-    return {
-      dailysalarys
     }
   },
+
   components: {
     PageLoader
+  },
+  mounted() {
+    this.getData();
+    setTimeout(() => this.load = false, 2000);
   }
+
 
 
 }

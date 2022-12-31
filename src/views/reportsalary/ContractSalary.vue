@@ -1,5 +1,5 @@
 <template>
-  <PageLoader v-if="contractsalarys.length <= 0" />
+  <PageLoader v-if="contractsalaries.length <= 0 ? contractsalaries.length : load" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
@@ -33,8 +33,8 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(contractsalary, index) in contractsalarys" :key="index">
-                    <td>{{ index+1 }}</td>
+                  <tr v-for="(contractsalary, index) in contractsalaries" :key="index">
+                    <td>{{ index + 1 }}</td>
                     <td>{{ contractsalary.division_name }}</td>
                     <td>{{ contractsalary.name }}</td>
                     <td>{{ contractsalary.basic_salary }}</td>
@@ -44,8 +44,8 @@
                     <td>{{ contractsalary.remainder_furlough }}</td>
                     <td>
                       <div class="btn-group">
-                        <router-link to="/contractsalarys/show/:id" class="btn btn-sm btn-outline-info rounded mr-1">
-                          detail
+                        <router-link :to="{name: 'contract-salary.show', params: {id: contractsalary.id}}" class="btn btn-info rounded mr-1">
+                          <i class="fas fa-eye"></i>  detail
                         </router-link>
                       </div>
                     </td>
@@ -64,30 +64,35 @@
 <script>
 
 import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import env from '../../../env'
 import PageLoader from "../../components/PageLoader.vue";
 
 export default {
-  setup() {
-    // reative state
-    let contractsalarys = ref([]);
-
-    onMounted(() => {
-      //get api
-      axios.get('http://127.0.0.1:8000/api/contractsalary')
+  data() {
+    return {
+      contractsalaries: [],
+      load: [],
+    }
+  },
+  methods: {
+    getData() {
+      let url = env.VUE_APP_URL + "contractsalary";
+      axios.get(url)
         .then((result) => {
-          contractsalarys.value = result.data.data
+          this.contractsalaries = result.data.data;
         }).catch((err) => {
           console.log(err.response)
         });
-    });
-
-    return {
-      contractsalarys
     }
   },
-  components : {
+
+  components: {
     PageLoader
+  },
+  mounted() {
+    this.getData();
+      setTimeout(() => this.load = false, 2000);
+    
   }
 
 

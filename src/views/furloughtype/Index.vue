@@ -1,5 +1,5 @@
 <template>
-  <PageLoader v-if="furloughtypes.length <= 0" />
+  <PageLoader v-if="furloughtypes.length <= 0 ? furloughtypes.length : load" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -13,14 +13,21 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
-            <div class="card-header">
-              <button type="button" class="btn btn-primary" data-toggle="modal" @click="showModal()">
-                <i class="fas fa-user-plus"></i>Tambah Tipe Cuti
+            <div class="card-header row">
+              <button type="button" class="btn btn-primary col-3" data-toggle="modal" @click="showModal()">
+                <i class="fas fa-user-plus"></i>Tipe Cuti
               </button>
+              <form class="col-6 ms-auto" @submit.prevent="getData()">
+              <div class="input-group">
+                <input type="text" class="form-control" v-model="keyword">
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> 
+                  </button>
+                </div>
+              </div>
+              </form>
             </div>
-            <!-- <input type="text" v-model="per_page">
-            <input type="text" v-model="keyword" placeholder="keyword">
-            <button @click="getData()">Refresh</button> -->
             <div class="card-body">
               <table id="example2" class="table table-bordered table-hover">
                 <thead>
@@ -105,6 +112,7 @@ export default {
       statusModal: false,
       validation: [],
       furloughtypes: [],
+      load: [],
       form: {
         id: '',
         furlough_name: ''
@@ -189,6 +197,7 @@ export default {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
+        cancelButtonText: "Tidak",
         confirmButtonText: 'Ya, Hapus!'
       }).then((result) => {
         if (result.value) {
@@ -219,6 +228,7 @@ export default {
 
   mounted() {
     this.getData();
+    setTimeout(() => (this.load = false), 2000);
 
   },
 

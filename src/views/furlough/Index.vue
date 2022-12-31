@@ -1,5 +1,5 @@
 <template>
-  <PageLoader v-if="furloughs.length <= 0" />
+  <PageLoader v-if="furloughs.length <= 0 ? furloughs.length : load" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -13,14 +13,22 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
-            <div class="card-header">
-              <button type="button" class="btn btn-primary" data-toggle="modal" @click="showModal()">
+            <div class="card-header row">
+              <button type="button" class="btn btn-primary col-3" data-toggle="modal" @click="showModal()">
                 <i class="fas fa-user-plus"></i>Tambah Cuti
               </button>
+              <form class="col-6 ms-auto" @submit.prevent="getData()">
+              <div class="input-group">
+                <input type="text" class="form-control" v-model="keyword">
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> 
+                  </button>
+                </div>
+              </div>
+              </form>
             </div>
-            <!-- <input type="text" v-model="per_page">
-            <input type="text" v-model="keyword" placeholder="keyword">
-            <button @click="getData()">Refresh</button> -->
+            
             <div class="card-body">
               <table id="example2" class="table table-bordered table-hover">
                 <thead>
@@ -71,7 +79,7 @@
                 <div class="mb-3">
                   <label for="" class="form-label">Nama</label>
                   <select v-model="form.employee_id" id="" class="form-select">
-                    <option v-for="employee in employees.data" :value="employee.id">{{ employee.name }}</option>
+                    <option v-for="employee in employees.data" v-bind:value="employee.id" v-bind:selected="employee.id == form.employee_id ">{{ employee.name }}</option>
                   </select>
                   <div v-if="validation.employee_id" class="text-danger">
                     {{ validation.employee_id[0] }}
@@ -115,15 +123,7 @@
         </div>
       </div>
     </div>
-    <nav aria-label="Page navigation example">
-      <ul class="pagination">
-        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-        <li class="page-item"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-      </ul>
-    </nav>
+ 
   </section>
 </template>
 
@@ -136,8 +136,10 @@ export default {
   data() {
     return {
       statusModal: false,
+      load: [],
       furloughs: [],
       employees: [],
+      keyword: '',
       validation: [],
       furloughTypes: [],
       form: {
@@ -177,7 +179,12 @@ components: {
     getData() {
       let url = env.VUE_APP_URL + "furlough";
       axios
-        .get(url)
+        .get(url,{
+        params: {
+          per_page: this.per_page,
+          keyword: this.keyword
+        }
+      })
         .then((result) => {
           this.furloughs = result.data.data
         })
@@ -229,6 +236,7 @@ components: {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
+        cancelButtonText: "Tidak",
         confirmButtonText: 'Ya, Hapus!'
       }).then((result) => {
         if (result.value) {
@@ -282,10 +290,11 @@ components: {
     this.getData();
     this.getEmployees();
     this.getFurloughTypes();
+    setTimeout(() => this.load = false, 2000);
   }
 }
 </script>
 
 <style>
-@import "vue-select/dist/vue-select.css";
+
 </style>

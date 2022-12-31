@@ -9,7 +9,7 @@
 
 
 <style lang="scss" scoped>
-   $colors: #e21009, #dfe20f, #0fac17, #1013b1;
+   $colors: #e21009, #e2d40f, #0fac17, #1013b1;
   // -----------------------------------------------------
   .page-loader {
     display: flex;

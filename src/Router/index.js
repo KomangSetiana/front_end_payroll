@@ -10,7 +10,7 @@ const routes = [
         name: "home",
         component: () => import("../views/Home.vue"),
       },
-      { 
+      {
         path: "/employees",
         name: "employees",
         component: () => import("../views/employees/Index.vue"),
@@ -81,13 +81,12 @@ const routes = [
         name: "furlough",
         component: () => import("../views/furlough/Index.vue"),
       },
-
     ],
   },
 ];
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
+  routes,
+});
 
 export default router;

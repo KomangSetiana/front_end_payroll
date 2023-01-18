@@ -17,18 +17,20 @@
               <button type="button" class="btn btn-primary col-3" data-toggle="modal" @click="showModal()">
                 <i class="fas fa-user-plus"></i>Tambah Cuti
               </button>
-              <form class="col-6 ms-auto" @submit.prevent="getData()">
-              <div class="input-group">
-                <input type="text" class="form-control" v-model="keyword">
-                <div class="input-group-append">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> 
-                  </button>
+
+              <div class="col-6 ms-auto">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="Masukan Nama Karyawan..." v-model="search" />
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
-              </form>
+              
             </div>
-            
+
             <div class="card-body">
               <table id="example2" class="table table-bordered table-hover">
                 <thead>
@@ -42,8 +44,8 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(furlough, index) in furloughs" :key="index">
-                    <td>{{ index+1 }}</td>
+                  <tr v-for="(furlough, index) in searchResult" :key="index">
+                    <td>{{ index+ 1 }}</td>
                     <td>{{ furlough.employees.name }}</td>
                     <td>{{ furlough.furlough_types.furlough_name }}</td>
                     <td>{{ furlough.date }}</td>
@@ -62,6 +64,29 @@
                 </tbody>
               </table>
             </div>
+            <div class="ml-3 ">
+              <nav aria-label="Page navigation example">
+                <ul class="pagination ">
+
+                  <li class="page-item" :class="{ 'disabled': !prev }">
+                    <a class="page-link" href="#" @click.prevent="getData(active - 1)" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  <li class="page-item" v-for="page in pagination" :key="page" :class="{ 'active': page == active }">
+                    <a class="page-link" href="#" @click.prevent="getData(page)">{{ page }}</a>
+                  </li>
+                  <li class="page-item" :class="{ 'disabled': !next }">
+                    <a class="page-link" href="#" @click.prevent="getData(active + 1)" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+              <div class="mb-3">
+                Showing {{ from }} to {{ to }} of {{ total }} entries
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -79,7 +104,8 @@
                 <div class="mb-3">
                   <label for="" class="form-label">Nama</label>
                   <select v-model="form.employee_id" id="" class="form-select">
-                    <option v-for="employee in employees.data" v-bind:value="employee.id" v-bind:selected="employee.id == form.employee_id ">{{ employee.name }}</option>
+                    <option v-for="employee in employees.data" v-bind:value="employee.id"
+                      v-bind:selected="employee.id == form.employee_id">{{ employee.name }}</option>
                   </select>
                   <div v-if="validation.employee_id" class="text-danger">
                     {{ validation.employee_id[0] }}
@@ -87,7 +113,7 @@
                   <label for="" class="form-label">Tipe Cuti</label>
                   <select v-model="form.furlough_type_id" id="" class="form-select">
                     <option v-for="furloughType in furloughTypes.data" :value="furloughType.id">{{
-                        furloughType.furlough_name
+                      furloughType.furlough_name
                     }}</option>
                   </select>
                   <div v-if="validation.furlough_type_id" class="text-danger">
@@ -108,11 +134,11 @@
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Close
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="!statusModal">
-                    Simpan
+                  <button type="submit" class="btn btn-primary" v-show="!statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Simpan
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="statusModal">
-                    Ubah
+                  <button type="submit" class="btn btn-primary" v-show="statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Ubah
                   </button>
                 </div>
               </form>
@@ -123,7 +149,7 @@
         </div>
       </div>
     </div>
- 
+
   </section>
 </template>
 
@@ -136,12 +162,23 @@ export default {
   data() {
     return {
       statusModal: false,
+      disabled: false,
+      loading: false,
       load: [],
       furloughs: [],
       employees: [],
       keyword: '',
       validation: [],
       furloughTypes: [],
+      per_page: 30,
+      pagination: {},
+      search: '',
+      active: {},
+      prev: {},
+      next: {},
+      from: '',
+      to: '',
+      total: '',
       form: {
         id: '',
         employee_id: '',
@@ -159,41 +196,56 @@ export default {
       }
     };
   },
-components: {
-  PageLoader
-},
+  components: {
+    PageLoader
+  },
   methods: {
     showModal() {
-      this.form ={}
+      this.form = {}
       this.validation = []
       this.statusModal = false,
-        $("#showModal").modal("show");
+        this.loading = false;
+      this.disabled = false;
+      $("#showModal").modal("show");
     },
     showModalEdit() {
       this.statusModal = true;
+      this.loading = false;
+      this.disabled = false;
       this.validation = []
+      this.form.employee_id = this.form.employees.id
+      this.form.furlough_type_id = this.form.furlough_types.id
       this.getData()
       $("#showModal").modal("show");
 
     },
-    getData() {
-      let url = env.VUE_APP_URL + "furlough";
+    getData(page) {
+      let url = env.VUE_APP_URL + `furlough?page=${page}`;
       axios
-        .get(url,{
-        params: {
-          per_page: this.per_page,
-          keyword: this.keyword
-        }
-      })
+        .get(url, {
+          params: {
+            per_page: this.per_page,
+            keyword: this.keyword
+          }
+        })
         .then((result) => {
           this.furloughs = result.data.data
+          this.pagination = result.data.meta.last_page
+          this.active = result.data.meta.curent_page
+          this.prev = result.data.meta.prev
+          this.next = result.data.meta.next
+
+
+          this.from = result.data.meta.from
+          this.to = result.data.meta.to
+          this.total = result.data.meta.total
         })
         .catch((err) => {
           console.log(err.response);
         });
     },
     storeData() {
-
+      this.loading = true;
       let url = env.VUE_APP_URL + "furlough";
       axios.post(url, this.form)
         .then(() => {
@@ -212,6 +264,8 @@ components: {
         });
     },
     update() {
+
+      this.loading = true;
       let url = env.VUE_APP_URL + 'furlough/' + this.form.id
       axios.put(url, this.form)
         .then(() => {
@@ -291,6 +345,22 @@ components: {
     this.getEmployees();
     this.getFurloughTypes();
     setTimeout(() => this.load = false, 2000);
+  },
+  computed: {
+    searchResult() {
+      let employee = this.furloughs
+      console.log(this.search)
+
+      if (this.search != '' && this.search) {
+        employee = employee.filter((item) => {
+          return item.employees.name
+            .toUpperCase()
+            .includes(this.search.toUpperCase())
+            // item.divisions.division_name.toUpperCase.includes(this.search.toUpperCase())
+        })
+      }
+      return employee
+    }
   }
 }
 </script>

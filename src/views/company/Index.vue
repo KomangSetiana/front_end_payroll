@@ -1,5 +1,5 @@
 <template>
-<PageLoader v-if="companies.length <= 0 ? companies.length : load" />
+  <PageLoader v-if="companies.length <= 0 ? companies.length : load" />
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-12">
@@ -15,20 +15,19 @@
           <div class="card">
             <div class="card-header row">
               <button type="button" class="btn btn-primary col-3" data-toggle="modal" @click="showModal()">
-                <i class="fas fa-user-plus"></i>Tambah Perusahaan
+                <i class="fas fa-plus"></i> Tambah Perusahaan
               </button>
-              
-              <form class="col-6 ms-auto" @submit.prevent="getData()">
-              <div class="input-group">
-                <input type="text" class="form-control" v-model="keyword">
-                <div class="input-group-append">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> 
-                  </button>
-                  <button class="btn btn-white" @onclick="getData()"><i class="fas fa-sync"></i></button>
+
+              <div class="col-6 ms-auto">
+                <div class="input-group">
+                  <input type="text" class="form-control" v-model="search" />
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
-              </form>
             </div>
             <div class="card-body">
               <table id="example2" class="table table-bordered table-hover">
@@ -40,8 +39,8 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(company, index) in companies.data" :key="index">
-                    <td>{{ index+1 }}</td>
+                  <tr v-for="(company, index) in searchResult" :key="index">
+                    <td>{{ index+ 1 }}</td>
                     <td>{{ company.company_name }}</td>
                     <td>
                       <div class="btn-group">
@@ -75,18 +74,18 @@
                   <label for="" class="form-label">Nama Perusahaan</label>
                   <input type="text" class="form-control" v-model="form.company_name">
                 </div>
-                <div v-if="validation.company_name"  class="text-danger">
+                <div v-if="validation.company_name" class="text-danger">
                   {{ validation.company_name[0] }}
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Close
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="!statusModal">
-                    Simpan
+                  <button type="submit" class="btn btn-primary" v-show="!statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Simpan
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="statusModal">
-                    Ubah
+                  <button type="submit" class="btn btn-primary" v-show="statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Ubah
                   </button>
                 </div>
               </form>
@@ -112,6 +111,9 @@ export default {
       statusModal: false,
       companies: [],
       validation: [],
+      disabled: false,
+      loading: false,
+      search: '',
       load: [],
       form: {
         id: '',
@@ -125,17 +127,20 @@ export default {
 
   methods: {
     showModal() {
-      this.form = {
-      },
-      this.validation =[]
+      this.form = {},
+        this.validation = []
       this.statusModal = false,
-        $("#showModal").modal("show");
+        this.loading = false;
+      this.disabled = false;
+      $("#showModal").modal("show");
     },
     showModalEdit() {
       this.validation = []
       this.statusModal = true;
-      this.getData()
-      $("#showModal").modal("show");
+      this.loading = false;
+      this.disabled = false;
+      // $("#showModal").modal("show");
+      $("#showModal").modal("show")
 
     },
     getData() {
@@ -148,14 +153,14 @@ export default {
           },
         })
         .then((result) => {
-          this.companies = result.data;
+          this.companies = result.data.data;
         })
         .catch((err) => {
           console.log(err.response);
         });
     },
     storeData() {
-
+      this.loading = true;
       let url = env.VUE_APP_URL + "company";
       axios.post(url, this.form)
         .then(() => {
@@ -174,6 +179,7 @@ export default {
         });
     },
     update() {
+      this.loading = true;
       let url = env.VUE_APP_URL + 'company/' + this.form.id
       axios.put(url, this.form)
         .then(() => {
@@ -232,32 +238,21 @@ export default {
     setTimeout(() => (this.load = false), 2000);
 
   },
-  // setup() {
-  //   // reative state
-  //   let companys = ref([]);
-  //   onMounted(() => {
-  //     //get api
-  //       axios.get('http://127.0.0.1:8000/api/company').then((result) => {
-  //         companys.value = result.data
-  //       }).catch((err) => {
-  //         console.log(err.response)
-  //       });
-  //   });
-  //   function  destroy(id, index) {
-  //     axios.delete(`http://127.0.0.1:8000/api/company/${id}`
-  //           )
-  //           .then(() => {
-  //           companys.value.data.splice(index, 1)
-  //           }).catch((err) => {
-  //               console.log(err.response.data)
-  //           });
+  computed: {
+    searchResult() {
+      let employee = this.companies
+      console.log(this.search)
 
-  // }
-
-  //   return {
-  //     companys,
-  //     destroy
-  //   }
-  // }
+      if (this.search != '' && this.search) {
+        employee = employee.filter((item) => {
+          return item.company_name
+            .toUpperCase()
+            .includes(this.search.toUpperCase())
+           
+        })
+      }
+      return employee
+    }
+  }
 };
 </script>

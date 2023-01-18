@@ -12,35 +12,44 @@
     <div class="card-body">
       <h4 class="card-title ">Slip Gaji</h4>
       <div class="card-text row">
+
         <div class="col-6">
           <p>Nama</p>
           <p>Divisi</p>
           <p>Status</p>
         </div>
-        <div class="col-6">
-          <p>Babi</p>
-          <p>RND</p>
-          <p>Harian</p>
-        </div>
+        <template v-for="day in showDaily">
+          <div class="col-6">
+            <p>{{ day.name }}</p>
+            <p>{{ day.division_name }}</p>
+            <p>Harian</p>
+          </div>
+        </template>
       </div>
     </div>
     <div class="card-footer bg-secondary">Rincian Gaji</div>
     <div class="card-text row">
+
       <div class="col-6">
         <p>Gaji Pokok</p>
         <p>jumlah Kerja</p>
         <p>cuti bulan ini</p>
+        <p>Total Masuk Kerja</p>
         <p class="text-bold">Total Gaji</p>
       </div>
-      <div class="col-6">
-        <p>100000</p>
-        <p>27</p>
-        <p>0</p>
-        <p class="text-bold">Rp. 2700000</p>
-      </div>
+      <template v-for="day in showDaily">
+        <div class="col-6">
+          <p>{{ day.basic_salary }}</p>
+          <p>{{ day.hari_kerja_bulan_ini }}</p>
+          <p>{{ day.cuti_bulan_ini }}</p>
+          <p>{{ day.work_day }}</p>
+          <p class="text-bold">Rp. {{ day.salary }}</p>
+        </div>
+      </template>
     </div>
+
     <div class="card-footer">
-     
+
       <router-link to="/daily-salary" class="btn btn-sm btn-primary ml-2">
         <i class="fas fa-angle-double-left"></i> Kembali
       </router-link>

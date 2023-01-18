@@ -17,16 +17,16 @@
               <button type="button" class="btn btn-primary col-3" data-toggle="modal" @click="showModal()">
                 <i class="fas fa-user-plus"></i>Tipe Cuti
               </button>
-              <form class="col-6 ms-auto" @submit.prevent="getData()">
-              <div class="input-group">
-                <input type="text" class="form-control" v-model="keyword">
-                <div class="input-group-append">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> 
-                  </button>
+              <div class="col-6 ms-auto">
+                <div class="input-group">
+                  <input type="text" class="form-control" v-model="search" />
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
-              </form>
             </div>
             <div class="card-body">
               <table id="example2" class="table table-bordered table-hover">
@@ -38,7 +38,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(furloughtype, index) in furloughtypes" :key="index">
+                  <tr v-for="(furloughtype, index) in searchResult" :key="index">
                     <td>{{ index + 1 }}</td>
                     <td>{{ furloughtype.furlough_name }}</td>
                     <td>
@@ -80,11 +80,11 @@
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Close
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="!statusModal">
-                    Simpan
+                  <button type="submit" class="btn btn-primary" v-show="!statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Simpan
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="statusModal">
-                    Ubah
+                  <button type="submit" class="btn btn-primary" v-show="statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Ubah
                   </button>
                 </div>
               </form>
@@ -112,6 +112,9 @@ export default {
       statusModal: false,
       validation: [],
       furloughtypes: [],
+      search: '',  
+      disabled: false,
+      loading: false,
       load: [],
       form: {
         id: '',
@@ -128,10 +131,14 @@ export default {
       this.form = {}
       this.validation = []
       this.statusModal = false,
-        $("#showModal").modal("show");
+        this.loading = false;
+      this.disabled = false;
+      $("#showModal").modal("show");
     },
     showModalEdit() {
       this.statusModal = true;
+      this.loading = false;
+      this.disabled = false;
       this.validation = []
       this.getData()
       $("#showModal").modal("show");
@@ -154,7 +161,7 @@ export default {
         });
     },
     storeData() {
-
+      this.loading = true;
       let url = env.VUE_APP_URL + "furloughtype";
       axios.post(url, this.form)
         .then(() => {
@@ -173,6 +180,7 @@ export default {
         });
     },
     update() {
+      this.loading = true;
       let url = env.VUE_APP_URL + 'furloughtype/' + this.form.id
       axios.put(url, this.form)
         .then(() => {
@@ -231,6 +239,21 @@ export default {
     setTimeout(() => (this.load = false), 2000);
 
   },
+  computed: {
+    searchResult() {
+      let employee = this.furloughtypes
+      console.log(this.search)
 
+      if (this.search != '' && this.search) {
+        employee = employee.filter((item) => {
+          return item.furlough_name
+            .toUpperCase()
+            .includes(this.search.toUpperCase())
+            // item.divisions.division_name.toUpperCase.includes(this.search.toUpperCase())
+        })
+      }
+      return employee
+    }
+  }
 }
 </script>

@@ -18,14 +18,14 @@
                 <i class="fas fa-user-plus"></i> Jabatan
               </button>
               <form class="col-6 ms-auto" @submit.prevent="getData()">
-              <div class="input-group">
-                <input type="text" class="form-control" v-model="keyword">
-                <div class="input-group-append">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> 
-                  </button>
+                <div class="input-group">
+                  <input type="text" class="form-control" v-model="keyword">
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
               </form>
             </div>
             <div class="card-body">
@@ -39,7 +39,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="(posisition, index) in posisitions" :key="index">
-                    <td>{{ index+1 }}</td>
+                    <td>{{ index+ 1 }}</td>
                     <td>{{ posisition.posisition_name }}</td>
                     <td>
                       <div class="btn-group">
@@ -80,11 +80,11 @@
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Close
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="!statusModal">
-                    Simpan
+                  <button type="submit" class="btn btn-primary" v-show="!statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Simpan
                   </button>
-                  <button type="submit" class="btn btn-primary" v-show="statusModal">
-                    Ubah
+                  <button type="submit" class="btn btn-primary" v-show="statusModal" :disabled="disabled">
+                    <i v-show="loading" class="fas fa-spinner fa-spin"></i> Ubah
                   </button>
                 </div>
               </form>
@@ -112,6 +112,8 @@ export default {
       statusModal: false,
       validation: [],
       posisitions: [],
+      disabled: false,
+      loading: false,
       load: [],
       form: {
         id: '',
@@ -128,11 +130,15 @@ export default {
       this.validation = []
       this.form = {}
       this.statusModal = false,
-        $("#showModal").modal("show");
+        this.loading = false;
+      this.disabled = false;
+      $("#showModal").modal("show");
     },
     showModalEdit() {
       this.validation = []
       this.statusModal = true;
+      this.loading = false;
+      this.disabled = false;
       this.getData()
       $("#showModal").modal("show");
 
@@ -154,7 +160,7 @@ export default {
         });
     },
     storeData() {
-
+      this.loading = true;
       let url = env.VUE_APP_URL + "posisition";
       axios.post(url, this.form)
         .then(() => {
@@ -173,6 +179,7 @@ export default {
         });
     },
     update() {
+      this.loading = true;
       let url = env.VUE_APP_URL + 'posisition/' + this.form.id
       axios.put(url, this.form)
         .then(() => {

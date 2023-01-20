@@ -64,9 +64,9 @@
                 </tbody>
               </table>
             </div>
-            <div class="ml-3 ">
+            <div class="ml-3">
               <nav aria-label="Page navigation example">
-                <ul class="pagination ">
+                <ul class="pagination justify-content-center">
 
                   <li class="page-item" :class="{ 'disabled': !prev }">
                     <a class="page-link" href="#" @click.prevent="getData(active - 1)" aria-label="Previous">
@@ -230,11 +230,10 @@ export default {
         })
         .then((result) => {
           this.furloughs = result.data.data
-          this.pagination = result.data.meta.last_page
-          this.active = result.data.meta.curent_page
-          this.prev = result.data.meta.prev
-          this.next = result.data.meta.next
-
+          this.pagination = result.data.meta.last_page;
+          this.active = result.data.meta.current_page
+          this.prev = result.data.links.prev
+          this.next = result.data.links.next
 
           this.from = result.data.meta.from
           this.to = result.data.meta.to
@@ -365,6 +364,3 @@ export default {
 }
 </script>
 
-<style>
-
-</style>

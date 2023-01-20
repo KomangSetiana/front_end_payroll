@@ -108,7 +108,7 @@
               <form class="row" @submit.prevent="statusModal ? update() : storeData()">
                 <div class="col-12">
                   <label for="name" class="form-label">Nama</label>
-                  <select id="inputState" class="form-select" v-model="form.employee_id">
+                  <select id="" class="form-select" v-model="form.employee_id">
                     <option selected></option>
                     <option v-for="employee in employees.data" :value="employee.id">{{ employee.name }}</option>
                   </select>
@@ -117,8 +117,8 @@
                   </div>
                 </div>
                 <div class="col-8">
-                  <label for="nik" class="form-label">Gaji Pokok</label>
-                  <input type="number" class="form-control" id="inputPassword4" v-model="form.basic_salary" />
+                  <label for="" class="form-label">Gaji Pokok</label>
+                  <input type="number" class="form-control" id="" v-model="form.basic_salary" />
                   <div v-if="validation.basic_salary" class="text-danger">
                     {{ validation.basic_salary[0] }}
                   </div>
@@ -282,7 +282,6 @@ export default {
         this.data_allowance = []
 
       this.form.allowances.forEach(element => {
-        console.log(element)
         this.data_allowance.push({
           'allowance_type_id': element.allowance_type_id,
           "allowance_name": element.allowance_types.allowance_name,
@@ -443,7 +442,7 @@ export default {
   computed: {
     searchResult() {
       let employee = this.salaries
-      console.log(this.search)
+  
 
       if (this.search != '' && this.search) {
         employee = employee.filter((item) => {

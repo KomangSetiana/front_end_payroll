@@ -90,7 +90,7 @@
               </nav>
               <div class="mb-3">
                 Showing {{ from }} to {{ to }} of {{ total }} entries
-              </div>
+              </div> 
             </div>
           </div>
         </div>
